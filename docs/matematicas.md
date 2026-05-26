@@ -6,23 +6,29 @@ This document describes the mathematical structure of VisionPro. The system comb
 
 Let the webcam stream be represented as a sequence of RGB frames:
 
-$$
+
+```math
 \mathcal{I} = \{ I_t \}_{t=1}^{T}
-$$
+```
+
 
 where each frame is an image tensor:
 
-$$
+
+```math
 I_t \in \mathbb{R}^{H \times W \times 3}
-$$
+```
+
 
 Here, \(H\) is the image height, \(W\) is the image width and \(t\) is the discrete time index associated with the current webcam frame.
 
 The complete runtime system can be described as a function:
 
-$$
+
+```math
 \mathcal{F}: I_t \mapsto (\hat{y}_t, c_t, \hat{s}_t, \hat{d}_t, z_t)
-$$
+```
+
 
 where:
 
@@ -36,29 +42,37 @@ where:
 
 A face detector is applied to each frame:
 
-$$
+
+```math
 D(I_t) = b_t
-$$
+```
+
 
 where \(b_t\) is the detected face bounding box:
 
-$$
+
+```math
 b_t = (x_t^{min}, y_t^{min}, x_t^{max}, y_t^{max})
-$$
+```
+
 
 If no face is detected, the system does not perform emotion inference for that frame.
 
 When a face is detected, the facial region is cropped as:
 
-$$
+
+```math
 F_t = \mathrm{crop}(I_t, b_t)
-$$
+```
+
 
 The crop is then normalized into a standard size:
 
-$$
+
+```math
 \tilde{F}_t = \mathrm{resize}(F_t, h_f, w_f)
-$$
+```
+
 
 where \(h_f\) and \(w_f\) are the height and width used by the feature extraction pipeline.
 
@@ -66,13 +80,16 @@ where \(h_f\) and \(w_f\) are the height and width used by the feature extractio
 
 The model does not classify the raw image directly. Instead, it maps the normalized face crop into a numerical feature vector:
 
-$$
+
+```math
 x_t = \phi(\tilde{F}_t)
-$$
+```
+
 
 The feature map \(\phi\) is composed of three main groups of features:
 
-$$
+
+```math
 \phi(\tilde{F}_t)
 =
 [
@@ -80,13 +97,16 @@ $$
 \phi_{LBP}(\tilde{F}_t),
 \phi_{geo}(\tilde{F}_t)
 ]
-$$
+```
+
 
 Therefore:
 
-$$
+
+```math
 x_t \in \mathbb{R}^{n}
-$$
+```
+
 
 where \(n\) is the total number of extracted features.
 
@@ -96,43 +116,55 @@ The Histogram of Oriented Gradients component represents local shape through ima
 
 Given a grayscale face image \(G_t\), the horizontal and vertical gradients are approximated by:
 
-$$
-G_x(i,j) = G_t(i,j+1) - G_t(i,j-1)
-$$
 
-$$
+```math
+G_x(i,j) = G_t(i,j+1) - G_t(i,j-1)
+```
+
+
+
+```math
 G_y(i,j) = G_t(i+1,j) - G_t(i-1,j)
-$$
+```
+
 
 The gradient magnitude is:
 
-$$
+
+```math
 m(i,j) = \sqrt{G_x(i,j)^2 + G_y(i,j)^2}
-$$
+```
+
 
 The gradient orientation is:
 
-$$
+
+```math
 \theta(i,j) = \arctan \left( \frac{G_y(i,j)}{G_x(i,j)} \right)
-$$
+```
+
 
 The HOG descriptor builds histograms of orientations over local image cells. For each cell \(C\), the histogram bin \(k\) is computed as:
 
-$$
+
+```math
 h_k(C) =
 \sum_{(i,j)\in C}
 m(i,j)\mathbb{1}(\theta(i,j)\in B_k)
-$$
+```
+
 
 where \(B_k\) is the angular interval associated with bin \(k\).
 
 The HOG vector is then obtained by concatenating normalized cell histograms:
 
-$$
+
+```math
 \phi_{HOG}(\tilde{F}_t)
 =
 [h_1, h_2, \ldots, h_q]
-$$
+```
+
 
 This captures local facial structure such as edges, wrinkles, mouth contours and eyebrow orientation.
 
@@ -142,26 +174,31 @@ The Local Binary Pattern component captures local texture information.
 
 For a pixel with intensity \(g_c\) and \(P\) neighboring pixels \(g_p\), the LBP code is:
 
-$$
+
+```math
 LBP_{P,R}
 =
 \sum_{p=0}^{P-1}
 s(g_p-g_c)2^p
-$$
+```
+
 
 where:
 
-$$
+
+```math
 s(u)=
 \begin{cases}
 1, & u \geq 0 \\
 0, & u < 0
 \end{cases}
-$$
+```
+
 
 The LBP descriptor is obtained by computing a histogram of LBP codes over the face image:
 
-$$
+
+```math
 \phi_{LBP}(\tilde{F}_t)
 =
 [
@@ -170,7 +207,8 @@ n_1,
 \ldots,
 n_{K-1}
 ]
-$$
+```
+
 
 where \(n_k\) is the frequency of the \(k\)-th LBP pattern.
 
@@ -182,50 +220,65 @@ The geometric feature component represents facial proportions. These features ar
 
 Let a set of facial or image based reference points be represented as:
 
-$$
+
+```math
 P_t = \{p_1, p_2, \ldots, p_m\}
-$$
+```
+
 
 where:
 
-$$
+
+```math
 p_i = (u_i, v_i)
-$$
+```
+
 
 A generic distance between two facial points is:
 
-$$
+
+```math
 d(p_i,p_j)=
 \sqrt{(u_i-u_j)^2+(v_i-v_j)^2}
-$$
+```
+
 
 To reduce dependence on face scale, geometric measurements are normalized by a reference facial size \(r_t\), for example face width or face height:
 
-$$
+
+```math
 \rho_{ij}(t)=
 \frac{d(p_i,p_j)}{r_t}
-$$
+```
+
 
 Examples of geometric ratios include:
 
-$$
+
+```math
 \rho_{mouth}(t)=
 \frac{h_{mouth}(t)}{w_{face}(t)}
-$$
+```
 
-$$
+
+
+```math
 \rho_{eye}(t)=
 \frac{h_{eye}(t)}{w_{face}(t)}
-$$
+```
 
-$$
+
+
+```math
 \rho_{brow}(t)=
 \frac{d_{brow-eye}(t)}{h_{face}(t)}
-$$
+```
+
 
 The complete geometric vector is:
 
-$$
+
+```math
 \phi_{geo}(\tilde{F}_t)
 =
 [
@@ -234,7 +287,8 @@ $$
 \ldots,
 \rho_r(t)
 ]
-$$
+```
+
 
 These measurements help distinguish expressions such as surprise, fear, anger and happiness.
 
@@ -242,17 +296,20 @@ These measurements help distinguish expressions such as surprise, fear, anger an
 
 The emotion classification problem is defined over six classes:
 
-$$
+
+```math
 \mathcal{Y}
 =
 \{
 y_1,y_2,y_3,y_4,y_5,y_6
 \}
-$$
+```
+
 
 where:
 
-$$
+
+```math
 \mathcal{Y}
 =
 \{
@@ -263,19 +320,24 @@ angry,
 afraid,
 surprised
 \}
-$$
+```
+
 
 For each frame, the goal is to estimate:
 
-$$
+
+```math
 p(y \mid x_t)
-$$
+```
+
 
 for every:
 
-$$
+
+```math
 y \in \mathcal{Y}
-$$
+```
+
 
 ## 8. Ensemble emotion classifier
 
@@ -283,67 +345,89 @@ VisionPro uses a statistical ensemble classifier instead of a single model.
 
 Let:
 
-$$
+
+```math
 M_1, M_2, \ldots, M_K
-$$
+```
+
 
 be the individual classifiers. In this project, the ensemble includes:
 
-$$
+
+```math
 M_1 = SVM_{RBF}
-$$
+```
 
-$$
+
+
+```math
 M_2 = ExtraTrees
-$$
+```
 
-$$
+
+
+```math
 M_3 = RandomForest
-$$
+```
 
-$$
+
+
+```math
 M_4 = LogisticRegression
-$$
+```
 
-$$
+
+
+```math
 M_5 = MLP
-$$
+```
+
 
 Each classifier produces a probability distribution over the emotion classes:
 
-$$
+
+```math
 p_k(y \mid x_t)=M_k(x_t)
-$$
+```
+
 
 The ensemble probability is computed by soft voting:
 
-$$
+
+```math
 p_{ens}(y \mid x_t)
 =
 \sum_{k=1}^{K}
 \alpha_k p_k(y \mid x_t)
-$$
+```
+
 
 where \(\alpha_k\) is the weight of the \(k\)-th classifier and:
 
-$$
+
+```math
 \sum_{k=1}^{K}\alpha_k=1
-$$
+```
+
 
 When equal weights are used:
 
-$$
+
+```math
 \alpha_k = \frac{1}{K}
-$$
+```
+
 
 The raw predicted emotion is:
 
-$$
+
+```math
 \hat{y}_t^{raw}
 =
 \arg\max_{y\in\mathcal{Y}}
 p_{ens}(y \mid x_t)
-$$
+```
+
 
 ## 9. Auxiliary rule based correction
 
@@ -351,33 +435,40 @@ In addition to the statistical model, the runtime system can use facial rules de
 
 Let:
 
-$$
+
+```math
 r_t(y)
-$$
+```
+
 
 be a rule based score for emotion \(y\), computed from facial measurements such as mouth opening, eye openness and eyebrow behavior.
 
 The model probability and rule score can be combined as:
 
-$$
+
+```math
 p_{mix}(y \mid x_t)
 =
 \lambda p_{ens}(y \mid x_t)
 +
 (1-\lambda) r_t(y)
-$$
+```
+
 
 where:
 
-$$
+
+```math
 0 \leq \lambda \leq 1
-$$
+```
+
 
 If \(\lambda\) is close to 1, the statistical model dominates. If \(\lambda\) is smaller, the rule based component has more influence.
 
 The mixed probability vector is normalized as:
 
-$$
+
+```math
 \tilde{p}_{mix}(y \mid x_t)
 =
 \frac{
@@ -385,7 +476,8 @@ p_{mix}(y \mid x_t)
 }{
 \sum_{y'\in\mathcal{Y}}p_{mix}(y' \mid x_t)
 }
-$$
+```
+
 
 ## 10. Temporal smoothing
 
@@ -393,7 +485,8 @@ Frame by frame webcam predictions can fluctuate because of lighting, head moveme
 
 Let:
 
-$$
+
+```math
 p_t =
 [
 p_t(y_1),
@@ -401,47 +494,58 @@ p_t(y_2),
 \ldots,
 p_t(y_6)
 ]
-$$
+```
+
 
 be the probability vector at frame \(t\).
 
 A temporal window of length \(m\) is used:
 
-$$
+
+```math
 \mathcal{W}_t =
 \{
 p_t,p_{t-1},\ldots,p_{t-m+1}
 \}
-$$
+```
+
 
 The smoothed probability vector is:
 
-$$
+
+```math
 \bar{p}_t
 =
 \sum_{i=0}^{m-1}w_i p_{t-i}
-$$
+```
+
 
 where:
 
-$$
+
+```math
 \sum_{i=0}^{m-1}w_i=1
-$$
+```
+
 
 and:
 
-$$
+
+```math
 w_i \geq 0
-$$
+```
+
 
 The final emotion prediction is:
 
-$$
+
+```math
 \hat{y}_t
 =
 \arg\max_{y\in\mathcal{Y}}
 \bar{p}_t(y)
-$$
+```
+
 
 This smoothing step improves stability during live webcam execution.
 
@@ -451,27 +555,34 @@ The live confidence shown on screen is not the same as validation accuracy.
 
 Let:
 
-$$
+
+```math
 p_{(1)} = \max_{y\in\mathcal{Y}}\bar{p}_t(y)
-$$
+```
+
 
 be the highest class probability, and let:
 
-$$
+
+```math
 p_{(2)}
-$$
+```
+
 
 be the second highest class probability.
 
 The probability margin is:
 
-$$
+
+```math
 \Delta_t = p_{(1)} - p_{(2)}
-$$
+```
+
 
 A live confidence score can be defined as:
 
-$$
+
+```math
 c_t =
 \mathrm{clip}
 (
@@ -479,7 +590,8 @@ p_{(1)} + \beta \Delta_t,
 0,
 1
 )
-$$
+```
+
 
 where \(\beta\) is a scaling factor.
 
@@ -489,7 +601,8 @@ This means that high confidence requires not only a high top probability, but al
 
 The validation accuracy is computed as:
 
-$$
+
+```math
 Acc =
 \frac{1}{N}
 \sum_{i=1}^{N}
@@ -497,7 +610,8 @@ Acc =
 (
 \hat{y}_i = y_i
 )
-$$
+```
+
 
 where:
 
@@ -508,15 +622,19 @@ where:
 
 The stored validation accuracy of the trained model was:
 
-$$
+
+```math
 Acc = 0.9333
-$$
+```
+
 
 or:
 
-$$
+
+```math
 Acc = 93.33\%
-$$
+```
+
 
 This metric measures performance on the validation set. It is different from the live confidence score displayed during webcam execution.
 
@@ -524,29 +642,35 @@ This metric measures performance on the validation set. It is different from the
 
 For a multiclass classifier, the confusion matrix is:
 
-$$
+
+```math
 C \in \mathbb{N}^{6\times 6}
-$$
+```
+
 
 where each element is:
 
-$$
+
+```math
 C_{ij}
 =
 \#\{
 samples\ with\ true\ class\ y_i\ predicted\ as\ y_j
 \}
-$$
+```
+
 
 A perfect classifier would produce a diagonal matrix:
 
-$$
+
+```math
 C_{ij}=0
 \quad
 for
 \quad
 i\neq j
-$$
+```
+
 
 The confusion matrix helps identify which emotion classes are more frequently confused.
 
@@ -554,23 +678,28 @@ The confusion matrix helps identify which emotion classes are more frequently co
 
 For each class \(y\), precision is:
 
-$$
+
+```math
 Precision(y)
 =
 \frac{TP_y}{TP_y + FP_y}
-$$
+```
+
 
 Recall is:
 
-$$
+
+```math
 Recall(y)
 =
 \frac{TP_y}{TP_y + FN_y}
-$$
+```
+
 
 The F1 score is the harmonic mean:
 
-$$
+
+```math
 F1(y)
 =
 2
@@ -579,7 +708,8 @@ Precision(y)Recall(y)
 }{
 Precision(y)+Recall(y)
 }
-$$
+```
+
 
 These metrics are useful because emotion datasets may not be perfectly balanced.
 
@@ -589,7 +719,8 @@ In live use, the user's neutral face may not look neutral to the general model. 
 
 During neutral calibration, the system records a sequence of probability vectors while the user maintains a neutral expression:
 
-$$
+
+```math
 \mathcal{N}
 =
 \{
@@ -598,20 +729,24 @@ p_2^{neutral},
 \ldots,
 p_q^{neutral}
 \}
-$$
+```
+
 
 The neutral reference pattern is estimated using the component wise median:
 
-$$
+
+```math
 p_0^{neutral}
 =
 \mathrm{median}
 (\mathcal{N})
-$$
+```
+
 
 A compatibility score between the current probability vector \(p_t\) and the user's neutral profile can be defined as:
 
-$$
+
+```math
 s_{neutral}(t)
 =
 \exp
@@ -623,7 +758,8 @@ s_{neutral}(t)
 2\sigma^2
 }
 \right)
-$$
+```
+
 
 If the compatibility with the neutral profile is high, the system can increase the neutral probability. This makes the system more personalized for the user.
 
@@ -633,37 +769,47 @@ Distance is estimated from the apparent size of the detected face.
 
 Let:
 
-$$
+
+```math
 h_t
-$$
+```
+
 
 be the detected face height in pixels at time \(t\).
 
 During calibration, the user is placed at a known physical distance:
 
-$$
+
+```math
 d_0
-$$
+```
+
 
 and the corresponding detected face height is:
 
-$$
+
+```math
 h_0
-$$
+```
+
 
 Assuming a pinhole camera approximation, apparent size is inversely proportional to distance:
 
-$$
+
+```math
 h_t \propto \frac{1}{d_t}
-$$
+```
+
 
 Therefore:
 
-$$
+
+```math
 d_t =
 d_0
 \frac{h_0}{h_t}
-$$
+```
+
 
 where:
 
@@ -680,9 +826,11 @@ The gaze module estimates the region of the screen that the user is looking at.
 
 Let the gaze feature extraction function be:
 
-$$
+
+```math
 g_t = \psi(I_t)
-$$
+```
+
 
 where \(g_t\) may include:
 
@@ -694,17 +842,21 @@ where \(g_t\) may include:
 
 Thus:
 
-$$
+
+```math
 g_t \in \mathbb{R}^{m}
-$$
+```
+
 
 ## 18. Multipoint gaze calibration
 
 During calibration, the user looks at known screen points:
 
-$$
+
+```math
 s_i = (u_i,v_i)
-$$
+```
+
 
 where:
 
@@ -713,31 +865,39 @@ where:
 
 For every calibration point, the system records a gaze feature vector:
 
-$$
+
+```math
 g_i = \psi(I_i)
-$$
+```
+
 
 The calibration dataset is:
 
-$$
+
+```math
 \mathcal{G}
 =
 \{
 (g_i,s_i)
 \}_{i=1}^{n}
-$$
+```
+
 
 The goal is to learn a mapping:
 
-$$
+
+```math
 G(g_t)=\hat{s}_t
-$$
+```
+
 
 where:
 
-$$
+
+```math
 \hat{s}_t=(\hat{u}_t,\hat{v}_t)
-$$
+```
+
 
 is the estimated gaze point.
 
@@ -745,7 +905,8 @@ is the estimated gaze point.
 
 To improve over a purely linear mapping, the gaze features can be expanded:
 
-$$
+
+```math
 \Phi(g_t)
 =
 [
@@ -761,32 +922,39 @@ g_m^2,
 g_1g_2,
 \ldots
 ]
-$$
+```
+
 
 The gaze regression model is:
 
-$$
+
+```math
 \hat{s}_t
 =
 W^\top \Phi(g_t)
-$$
+```
+
 
 where:
 
-$$
+
+```math
 W \in \mathbb{R}^{q \times 2}
-$$
+```
+
 
 contains the regression coefficients for horizontal and vertical gaze coordinates.
 
 Using ridge regression, \(W\) can be estimated as:
 
-$$
+
+```math
 W
 =
 (\Phi^\top \Phi + \lambda I)^{-1}
 \Phi^\top S
-$$
+```
+
 
 where:
 
@@ -801,27 +969,33 @@ As with emotion prediction, gaze estimation can fluctuate frame by frame.
 
 Let:
 
-$$
+
+```math
 \hat{s}_t = (\hat{u}_t,\hat{v}_t)
-$$
+```
+
 
 be the current gaze estimate.
 
 A smoothed gaze point can be computed using an exponential moving average:
 
-$$
+
+```math
 \bar{s}_t
 =
 \gamma \hat{s}_t
 +
 (1-\gamma)\bar{s}_{t-1}
-$$
+```
+
 
 where:
 
-$$
+
+```math
 0 \leq \gamma \leq 1
-$$
+```
+
 
 Higher values of \(\gamma\) react faster but are noisier. Lower values are smoother but slower.
 
@@ -829,59 +1003,72 @@ Higher values of \(\gamma\) react faster but are noisier. Lower values are smoot
 
 The estimated screen point is converted into relative coordinates:
 
-$$
+
+```math
 r_x =
 \frac{\hat{u}_t}{W_s}
-$$
+```
 
-$$
+
+
+```math
 r_y =
 \frac{\hat{v}_t}{H_s}
-$$
+```
+
 
 where \(W_s\) and \(H_s\) are the screen width and height.
 
 The horizontal region is:
 
-$$
+
+```math
 Z_x =
 \begin{cases}
 left, & r_x < \frac{1}{3} \\
 center, & \frac{1}{3} \leq r_x < \frac{2}{3} \\
 right, & r_x \geq \frac{2}{3}
 \end{cases}
-$$
+```
+
 
 The vertical region is:
 
-$$
+
+```math
 Z_y =
 \begin{cases}
 top, & r_y < \frac{1}{3} \\
 middle, & \frac{1}{3} \leq r_y < \frac{2}{3} \\
 bottom, & r_y \geq \frac{2}{3}
 \end{cases}
-$$
+```
+
 
 The final screen zone is:
 
-$$
+
+```math
 z_t = (Z_x,Z_y)
-$$
+```
+
 
 Examples include:
 
-$$
+
+```math
 (left,top),
 (center,middle),
 (right,bottom)
-$$
+```
+
 
 ## 22. Behavioral logging
 
 At each time step, the system can store:
 
-$$
+
+```math
 \ell_t =
 (
 \tau_t,
@@ -894,7 +1081,8 @@ r_y,
 z_t,
 \hat{d}_t
 )
-$$
+```
+
 
 where:
 
@@ -908,19 +1096,22 @@ where:
 
 The full log is:
 
-$$
+
+```math
 \mathcal{L}
 =
 \{
 \ell_t
 \}_{t=1}^{T}
-$$
+```
+
 
 ## 23. Emotion distribution by screen zone
 
 For a given screen region \(R\), the empirical probability of emotion \(y\) is:
 
-$$
+
+```math
 P(y \mid R)
 =
 \frac{
@@ -931,7 +1122,8 @@ P(y \mid R)
 \sum_{t=1}^{T}
 \mathbb{1}(z_t=R)
 }
-$$
+```
+
 
 This allows the system to estimate which emotions are most frequently associated with a screen region.
 
@@ -939,7 +1131,8 @@ This allows the system to estimate which emotions are most frequently associated
 
 For a region \(R\), the average confidence is:
 
-$$
+
+```math
 \bar{c}_R
 =
 \frac{
@@ -950,7 +1143,8 @@ c_t
 \sum_{t=1}^{T}
 \mathbb{1}(z_t=R)
 }
-$$
+```
+
 
 This gives a measure of how stable or confident the model was when the user looked at a specific zone.
 
@@ -958,20 +1152,24 @@ This gives a measure of how stable or confident the model was when the user look
 
 The amount of time spent looking at region \(R\) can be approximated as:
 
-$$
+
+```math
 T_R =
 \sum_{t=1}^{T}
 \mathbb{1}(z_t=R)\Delta t
-$$
+```
+
 
 where \(\Delta t\) is the approximate time difference between frames.
 
 The relative attention share is:
 
-$$
+
+```math
 A_R =
 \frac{T_R}{\sum_{R'}T_{R'}}
-$$
+```
+
 
 This can be used to compare visual attention across different screen regions.
 
@@ -979,7 +1177,8 @@ This can be used to compare visual attention across different screen regions.
 
 The complete system can be summarized as:
 
-$$
+
+```math
 I_t
 \rightarrow
 F_t
@@ -989,11 +1188,13 @@ x_t
 \bar{p}_t
 \rightarrow
 \hat{y}_t
-$$
+```
+
 
 for emotion recognition, and:
 
-$$
+
+```math
 I_t
 \rightarrow
 g_t
@@ -1001,13 +1202,15 @@ g_t
 \hat{s}_t
 \rightarrow
 z_t
-$$
+```
+
 
 for gaze estimation.
 
 The synchronized output is:
 
-$$
+
+```math
 (
 \hat{y}_t,
 c_t,
@@ -1015,7 +1218,8 @@ c_t,
 z_t,
 \hat{d}_t
 )
-$$
+```
+
 
 This allows VisionPro to associate facial emotion predictions with approximate visual attention.
 
