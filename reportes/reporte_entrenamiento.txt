@@ -1,0 +1,31 @@
+Accuracy validacion: 0.9333
+
+Imagenes por emocion:
+neutro: 160
+feliz: 159
+triste: 159
+enojado: 158
+asustado: 160
+sorprendido: 158
+
+Reporte:
+              precision    recall  f1-score   support
+
+    asustado     0.8500    0.9714    0.9067        35
+     enojado     0.9688    0.8857    0.9254        35
+       feliz     1.0000    0.9143    0.9552        35
+      neutro     0.9722    1.0000    0.9859        35
+ sorprendido     0.9412    0.9143    0.9275        35
+      triste     0.8889    0.9143    0.9014        35
+
+    accuracy                         0.9333       210
+   macro avg     0.9368    0.9333    0.9337       210
+weighted avg     0.9368    0.9333    0.9337       210
+
+Matriz de confusion, orden ['neutro', 'feliz', 'triste', 'enojado', 'asustado', 'sorprendido']:
+[[35  0  0  0  0  0]
+ [ 0 32  2  0  0  1]
+ [ 0  0 32  0  3  0]
+ [ 1  0  2 31  0  1]
+ [ 0  0  0  1 34  0]
+ [ 0  0  0  0  3 32]]
