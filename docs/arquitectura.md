@@ -77,12 +77,12 @@ flowchart TD
     AD --> H
     AD --> AE["Validation report<br/>reportes/reporte_entrenamiento.txt"]
 
-    classDef input fill:#E3F2FD,stroke:#1565C0,stroke-width:1px;
-    classDef process fill:#F3E5F5,stroke:#6A1B9A,stroke-width:1px;
-    classDef model fill:#FFF3E0,stroke:#EF6C00,stroke-width:1px;
-    classDef output fill:#E8F5E9,stroke:#2E7D32,stroke-width:1px;
-    classDef decision fill:#FFFDE7,stroke:#F9A825,stroke-width:1px;
-    classDef storage fill:#ECEFF1,stroke:#455A64,stroke-width:1px;
+    classDef input fill:#0B3D5C,stroke:#7DD3FC,color:#F8FAFC,stroke-width:1.5px;
+    classDef process fill:#312E81,stroke:#A5B4FC,color:#F8FAFC,stroke-width:1.5px;
+    classDef model fill:#7C2D12,stroke:#FDBA74,color:#FFF7ED,stroke-width:1.5px;
+    classDef output fill:#14532D,stroke:#86EFAC,color:#F0FDF4,stroke-width:1.5px;
+    classDef decision fill:#713F12,stroke:#FDE68A,color:#FFFBEB,stroke-width:1.5px;
+    classDef storage fill:#1F2937,stroke:#CBD5E1,color:#F8FAFC,stroke-width:1.5px;
 
     class A,AA input;
     class B,C,E,F,F1,F2,F3,J,K,L,N,O,Q,R,S,T,V,Z process;
