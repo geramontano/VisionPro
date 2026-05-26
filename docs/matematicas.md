@@ -51,13 +51,13 @@ If no face is detected, the system does not perform emotion inference for that f
 When a face is detected, the facial region is cropped as:
 
 $$
-F_t = \operatorname{crop}(I_t, b_t)
+F_t = \mathrm{crop}(I_t, b_t)
 $$
 
 The crop is then normalized into a standard size:
 
 $$
-\tilde{F}_t = \operatorname{resize}(F_t, h_f, w_f)
+\tilde{F}_t = \mathrm{resize}(F_t, h_f, w_f)
 $$
 
 where \(h_f\) and \(w_f\) are the height and width used by the feature extraction pipeline.
@@ -473,7 +473,7 @@ A live confidence score can be defined as:
 
 $$
 c_t =
-\operatorname{clip}
+\mathrm{clip}
 (
 p_{(1)} + \beta \Delta_t,
 0,
@@ -605,7 +605,7 @@ The neutral reference pattern is estimated using the component wise median:
 $$
 p_0^{neutral}
 =
-\operatorname{median}
+\mathrm{median}
 (\mathcal{N})
 $$
 
