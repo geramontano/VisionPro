@@ -103,3 +103,10 @@ For example, when a user observes a web page, the system can estimate which regi
 ## Author
 
 Gerardo Alejandro Montano Gonzalez
+
+## Demo
+
+The following screenshot shows VisionPro running in real time with facial emotion recognition, gaze estimation, camera distance approximation and CSV logging.
+
+![VisionPro demo](assets/demo/visionprueba12.png)
+
