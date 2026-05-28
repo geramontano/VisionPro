@@ -514,9 +514,26 @@ class RegistroMirada:
         self.activo = False
         self.campos = [
             "tiempo", "emocion", "confianza", "mirada_x", "mirada_y", "mirada_rel_x", "mirada_rel_y",
-            "zona", "backend_mirada", "distancia_cm", "distancia_calibrada", "cara_area", "nota"
+            "zona", "backend_mirada", "distancia_cm", "distancia_calibrada", "cara_area",
+            "active_app", "window_title", "browser", "page_title", "url",
+            "mouse_x", "mouse_y", "active_screen", "screen_count",
+            "nota"
         ]
         self.ruta.parent.mkdir(parents=True, exist_ok=True)
+
+        if self.ruta.exists():
+            try:
+                with open(self.ruta, "r", encoding="utf-8") as f:
+                    encabezado = f.readline().strip().split(",")
+                faltantes = [c for c in self.campos if c not in encabezado]
+                if faltantes:
+                    respaldo = self.ruta.with_name(self.ruta.stem + ".backup_antes_mouse_screen" + self.ruta.suffix)
+                    if not respaldo.exists():
+                        self.ruta.rename(respaldo)
+                        print("CSV anterior respaldado en:", respaldo)
+            except Exception:
+                pass
+
         if not self.ruta.exists():
             with open(self.ruta, "w", newline="", encoding="utf-8") as f:
                 writer = csv.DictWriter(f, fieldnames=self.campos)
@@ -527,6 +544,23 @@ class RegistroMirada:
         fila = "arriba" if ry < 0.33 else "medio" if ry < 0.66 else "abajo"
         return fila + "_" + col
 
+    def pagina_actual(self):
+        try:
+            from pagina_activa import obtener_pagina_activa
+            return obtener_pagina_activa()
+        except Exception:
+            return {
+                "active_app": "",
+                "window_title": "",
+                "browser": "",
+                "page_title": "",
+                "url": "",
+                "mouse_x": "",
+                "mouse_y": "",
+                "active_screen": "",
+                "screen_count": "",
+            }
+
     def agregar(self, emocion, confianza, x, y, rx, ry, backend, area=None, distancia_cm=None, distancia_calibrada=False, nota=""):
         if not self.activo:
             return
@@ -534,6 +568,9 @@ class RegistroMirada:
         if ahora - self.ultimo < self.intervalo:
             return
         self.ultimo = ahora
+
+        pagina = self.pagina_actual()
+
         fila = {
             "tiempo": datetime.now().isoformat(timespec="milliseconds"),
             "emocion": emocion,
@@ -547,8 +584,18 @@ class RegistroMirada:
             "distancia_cm": round(float(distancia_cm), 2) if distancia_cm is not None else "",
             "distancia_calibrada": bool(distancia_calibrada),
             "cara_area": round(float(area), 5) if area is not None else "",
+            "active_app": pagina.get("active_app", ""),
+            "window_title": pagina.get("window_title", ""),
+            "browser": pagina.get("browser", ""),
+            "page_title": pagina.get("page_title", ""),
+            "url": pagina.get("url", ""),
+            "mouse_x": pagina.get("mouse_x", ""),
+            "mouse_y": pagina.get("mouse_y", ""),
+            "active_screen": pagina.get("active_screen", ""),
+            "screen_count": pagina.get("screen_count", ""),
             "nota": nota,
         }
+
         with open(self.ruta, "a", newline="", encoding="utf-8") as f:
             writer = csv.DictWriter(f, fieldnames=self.campos)
             writer.writerow(fila)
